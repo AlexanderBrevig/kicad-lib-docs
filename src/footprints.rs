@@ -39,7 +39,6 @@ pub fn build_docs(folder: &str) -> Result<Vec<FootprintDoc>, std::io::Error> {
     let paths = fs::read_dir(folder).unwrap();
     for path in paths {
         let path = path.unwrap().path();
-        println!("{:?}", path);
         let data = fs::read_to_string(path).expect("Unable to read file");
 
         let re = Regex::new(r"\((tstamp|tedit) [a-zA-Z0-9-]*\)").unwrap();
