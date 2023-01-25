@@ -24,6 +24,22 @@ impl SymbolDoc {
     }
 }
 
+#[derive(Debug)]
+struct FootprintDoc {
+    footprint: String,
+    step: String,
+}
+
+impl FootprintDoc {
+    fn elem(&self, el: &str) -> String {
+        match el {
+            "footprint" => self.footprint.clone(),
+            "step" => self.step.clone(),
+            _ => String::new(),
+        }
+    }
+}
+
 fn find(val: &Value, root: &str, qualifier: &str, offset: usize) -> String {
     let mut root_idx = 0;
     loop {
@@ -84,7 +100,7 @@ fn build_symbol_docs(file: &str) -> Result<Vec<SymbolDoc>, Error> {
     Ok(docs)
 }
 
-fn write_readme(
+fn write_symbols_readme(
     file: &str,
     title: &str,
     format: &str,
@@ -108,7 +124,72 @@ fn write_readme(
     writeln!(&mut w, "")?;
     for _ in format.split("|") {
         if !first {
+            write!(&mut w, "|")?;
+        }
+        write!(&mut w, "---")?;
+        first = false;
+    }
+    writeln!(&mut w, "")?;
+    for doc in docs {
+        first = true;
+        for elem in format.split("|") {
+            if !first {
+                write!(&mut w, " | ")?;
+            }
+            write!(&mut w, "{}", doc.elem(elem))?;
+            first = false;
+        }
+        writeln!(&mut w, "")?;
+    }
+    Ok(())
+}
+
+fn build_footprint_docs(folder: &str) -> Result<Vec<FootprintDoc>, std::io::Error> {
+    let mut docs: Vec<FootprintDoc> = vec![];
+    let paths = fs::read_dir(folder).unwrap();
+    for path in paths {
+        let path = path.unwrap().path();
+        println!("{:?}", path);
+        let data = fs::read_to_string(path).expect("Unable to read file");
+
+        let kicad_sym = lexpr::from_str(&data)?;
+
+        let doc = FootprintDoc {
+            footprint: kicad_sym[1].to_string().replace("\"", ""),
+            //TODO: replace kicadmod with path
+            step: kicad_sym["model"][0].to_string(),
+        };
+        docs.push(doc);
+    }
+
+    Ok(docs)
+}
+
+fn write_footprints_readme(
+    file: &str,
+    title: &str,
+    format: &str,
+    docs: Vec<FootprintDoc>,
+) -> Result<(), std::io::Error> {
+    let mut w = File::create(file).unwrap();
+    write!(&mut w, "# {}\n\n", title)?;
+    let mut first = true;
+    for elem in format.split("|") {
+        if !first {
             write!(&mut w, " | ")?;
+        }
+        write!(
+            &mut w,
+            "{}{}",
+            (&elem[..1].to_string()).to_uppercase(),
+            &elem[1..]
+        )?;
+        first = false;
+    }
+    writeln!(&mut w, "")?;
+    for _ in format.split("|") {
+        if !first {
+            write!(&mut w, "|")?;
         }
         write!(&mut w, "---")?;
         first = false;
@@ -134,7 +215,12 @@ fn main() -> Result<(), std::io::Error> {
         "/home/alexander/github.com/winterbloom_kicad_library/symbols/winterbloom.kicad_sym",
     )?;
 
-    write_readme("SYMBOLS.md", "Symbols", "reference|symbol", docs)?;
+    write_symbols_readme("SYMBOLS.md", "Symbols", "reference|symbol", docs)?;
+
+    let docs = build_footprint_docs(
+        "/home/alexander/github.com/winterbloom_kicad_library/footprints/winterbloom.pretty",
+    )?;
+    write_footprints_readme("FOOTPRINTS.md", "Footprints", "footprint|step", docs)?;
 
     Ok(())
 }
