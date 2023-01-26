@@ -45,7 +45,6 @@ pub fn build_docs(folder: &str) -> Result<Vec<FootprintDoc>, std::io::Error> {
 
         let doc = FootprintDoc {
             footprint: kicad_sym[1].to_string().to_string(),
-            //TODO: replace kicadmod with path
             step: kicad_sym["model"][0].to_string(),
         };
         docs.push(doc);
