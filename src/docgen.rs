@@ -1,7 +1,7 @@
 use lexpr::Value;
 
 pub trait DocItem {
-    fn elem(&self, el: &str) -> String;
+    fn elem(&self, el: &String) -> String;
 }
 
 pub fn find(val: &Value, root: &str, qualifier: &str, offset: usize) -> String {

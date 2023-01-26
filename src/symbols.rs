@@ -14,8 +14,8 @@ pub struct SymbolDoc {
 }
 
 impl DocItem for SymbolDoc {
-    fn elem(&self, el: &str) -> String {
-        match el {
+    fn elem(&self, el: &String) -> String {
+        match el.as_str() {
             "symbol" => md::lexpr_str_to_md(self.symbol.clone()),
             "reference" => md::lexpr_str_to_md(self.reference.clone()),
             "value" => md::lexpr_str_to_md(self.value.clone()),
@@ -27,12 +27,11 @@ impl DocItem for SymbolDoc {
 }
 
 impl SymbolDoc {
-    fn sort_by_key(docs: &mut [SymbolDoc], format: &str) {
+    fn sort_by_key(docs: &mut [SymbolDoc], format: &Vec<String>) {
         let first = format
-            .split("|")
-            .into_iter()
-            .next()
-            .expect("Format must contain at least one key");
+            .first()
+            .expect("Must have at least one column")
+            .as_str();
         match first {
             "symbol" => docs.sort_by_key(|doc| doc.symbol.clone()),
             "reference" => docs.sort_by_key(|doc| doc.reference.clone()),
@@ -85,16 +84,23 @@ pub fn build_docs(file: &str) -> Result<Vec<SymbolDoc>, Error> {
 }
 
 pub fn write_readme(
-    file: &str,
     title: &str,
-    format: &str,
+    file: &str,
+    format: &Option<Vec<String>>,
+    _env: &Option<Vec<(String, String)>>, //TODO: handle env
     symbol_docs: &mut Vec<SymbolDoc>,
 ) -> Result<(), std::io::Error> {
-    SymbolDoc::sort_by_key(symbol_docs, format);
+    let default = vec![
+        "symbol".to_string(),
+        "datasheet".to_string(),
+        "footprint".to_string(),
+    ];
+    let format = format.as_ref().unwrap_or(&default);
+    SymbolDoc::sort_by_key(symbol_docs, &format);
     let mut writer = File::create(file).unwrap();
     md::title(&mut writer, title)?;
-    md::table_header(&mut writer, format)?;
-    md::table_sep(&mut writer, format)?;
-    md::table_content(&mut writer, format, symbol_docs)?;
+    md::table_header(&mut writer, &format)?;
+    md::table_sep(&mut writer, &format)?;
+    md::table_content(&mut writer, &format, symbol_docs)?;
     Ok(())
 }

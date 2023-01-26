@@ -2,10 +2,10 @@ use std::io::Write;
 
 use crate::docgen::DocItem;
 
-pub fn table_sep(w: &mut dyn std::io::Write, format: &str) -> Result<(), std::io::Error> {
+pub fn table_sep(w: &mut dyn std::io::Write, format: &Vec<String>) -> Result<(), std::io::Error> {
     writeln!(w, "")?;
     let mut first = true;
-    for _ in format.split("|") {
+    for _ in format {
         if !first {
             write!(w, "|")?;
         }
@@ -15,9 +15,12 @@ pub fn table_sep(w: &mut dyn std::io::Write, format: &str) -> Result<(), std::io
     Ok(())
 }
 
-pub(crate) fn table_header(w: &mut std::fs::File, format: &str) -> Result<(), std::io::Error> {
+pub(crate) fn table_header(
+    w: &mut std::fs::File,
+    format: &Vec<String>,
+) -> Result<(), std::io::Error> {
     let mut first = true;
-    for elem in format.split("|") {
+    for elem in format {
         if !first {
             write!(w, " | ")?;
         }
@@ -39,13 +42,13 @@ pub(crate) fn title(w: &mut std::fs::File, title: &str) -> Result<(), std::io::E
 
 pub(crate) fn table_content<T: DocItem>(
     w: &mut std::fs::File,
-    format: &str,
+    format: &Vec<String>,
     docs: &mut Vec<T>,
 ) -> Result<(), std::io::Error> {
     writeln!(w, "")?;
     for doc in docs {
         let mut first = true;
-        for elem in format.split("|") {
+        for elem in format {
             if !first {
                 write!(w, " | ")?;
             }

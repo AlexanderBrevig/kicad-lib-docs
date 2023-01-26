@@ -10,8 +10,8 @@ pub struct FootprintDoc {
 }
 
 impl DocItem for FootprintDoc {
-    fn elem(&self, el: &str) -> String {
-        match el {
+    fn elem(&self, el: &String) -> String {
+        match el.as_str() {
             "footprint" => md::lexpr_str_to_md(self.footprint.clone()),
             "step" => md::lexpr_str_to_md(self.step.clone()),
             _ => String::new(),
@@ -20,13 +20,11 @@ impl DocItem for FootprintDoc {
 }
 
 impl FootprintDoc {
-    fn sort_by_key(docs: &mut [FootprintDoc], format: &str) {
+    fn sort_by_key(docs: &mut [FootprintDoc], format: &Vec<String>) {
         let first = format
-            .split("|")
-            .into_iter()
-            .next()
+            .first()
             .expect("Format must contain at least one key");
-        match first {
+        match first.as_str() {
             "footprint" => docs.sort_by_key(|doc| doc.footprint.clone()),
             "step" => docs.sort_by_key(|doc| doc.step.clone()),
             _ => {}
@@ -57,16 +55,19 @@ pub fn build_docs(folder: &str) -> Result<Vec<FootprintDoc>, std::io::Error> {
 }
 
 pub fn write_readme(
-    file: &str,
     title: &str,
-    format: &str,
+    file: &str,
+    format: &Option<Vec<String>>,
+    _env: &Option<Vec<(String, String)>>, //TODO: handle env
     footprint_docs: &mut Vec<FootprintDoc>,
 ) -> Result<(), std::io::Error> {
-    FootprintDoc::sort_by_key(footprint_docs, format);
+    let default = vec!["footprint".to_string(), "step".to_string()];
+    let format = format.as_ref().unwrap_or(&default);
+    FootprintDoc::sort_by_key(footprint_docs, &format);
     let mut writer = File::create(file).unwrap();
     md::title(&mut writer, title)?;
-    md::table_header(&mut writer, format)?;
-    md::table_sep(&mut writer, format)?;
-    md::table_content(&mut writer, format, footprint_docs)?;
+    md::table_header(&mut writer, &format)?;
+    md::table_sep(&mut writer, &format)?;
+    md::table_content(&mut writer, &format, footprint_docs)?;
     Ok(())
 }

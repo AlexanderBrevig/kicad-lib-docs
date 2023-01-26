@@ -1,10 +1,13 @@
 [package]
-name = "kicad-lib-doc-gen"
+name = "kicad-lib-docgen"
 version = "0.1.0"
 edition = "2021"
+authors = ["Alexander Brevig <alexanderbrevig@gmail.com>"]
+lisence = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 lexpr = "0.2.6"
 regex = "1"
+clap = { version = "4.1.4", features = ["derive", "unstable-doc"] }
