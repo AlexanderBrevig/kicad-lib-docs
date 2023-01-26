@@ -6,11 +6,11 @@ use crate::md;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SymbolDoc {
-    symbol: String,
-    reference: String,
-    value: String,
-    footprint: String,
-    datasheet: String,
+    pub symbol: String,
+    pub reference: String,
+    pub value: String,
+    pub footprint: String,
+    pub datasheet: String,
 }
 
 impl DocItem for SymbolDoc {

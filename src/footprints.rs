@@ -5,8 +5,8 @@ use std::fs::{self, File};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FootprintDoc {
-    footprint: String,
-    step: String,
+    pub footprint: String,
+    pub step: String,
 }
 
 impl DocItem for FootprintDoc {
