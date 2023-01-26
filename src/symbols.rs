@@ -27,7 +27,7 @@ impl DocItem for SymbolDoc {
 }
 
 impl SymbolDoc {
-    fn sort_by_key(docs: &mut [SymbolDoc], format: &Vec<String>) {
+    pub fn sort_by_key(docs: &mut [SymbolDoc], format: &Vec<String>) {
         let first = format
             .first()
             .expect("Must have at least one column")
@@ -103,4 +103,96 @@ pub fn write_readme(
     md::table_sep(&mut writer, &format)?;
     md::table_content(&mut writer, &format, symbol_docs)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+
+    use std::fs;
+
+    use lexpr::parse::Error;
+
+    use crate::docgen::DocItem;
+    use crate::symbols::SymbolDoc;
+
+    #[test]
+    fn elem() {
+        let doc = SymbolDoc {
+            symbol: "symbol".to_string(),
+            reference: "reference".to_string(),
+            value: "value".to_string(),
+            footprint: "footprint".to_string(),
+            datasheet: "datasheet".to_string(),
+        };
+        let elem = doc.elem(&"symbol".to_string());
+        assert_eq!(elem, "symbol");
+    }
+
+    #[test]
+    fn sort_by_key() {
+        let mut docs = vec![
+            SymbolDoc {
+                symbol: "symbol".to_string(),
+                reference: "reference".to_string(),
+                value: "value".to_string(),
+                footprint: "aootprint".to_string(),
+                datasheet: "datasheet".to_string(),
+            },
+            SymbolDoc {
+                symbol: "aymbol".to_string(),
+                reference: "reference".to_string(),
+                value: "value".to_string(),
+                footprint: "footprint".to_string(),
+                datasheet: "datasheet".to_string(),
+            },
+        ];
+        SymbolDoc::sort_by_key(&mut docs, &vec!["symbol".to_string()]);
+        assert_eq!(docs.first().expect("").symbol, "aymbol");
+        SymbolDoc::sort_by_key(&mut docs, &vec!["footprint".to_string()]);
+        assert_eq!(docs.first().expect("").footprint, "aootprint");
+    }
+
+    #[test]
+    fn build_docs() -> Result<(), Error> {
+        let docs = crate::symbols::build_docs("resources/test/lib.kicad_sym")?;
+        assert_eq!(docs.len(), 2);
+        assert_eq!(docs[0].symbol, "\"74HC2G34\"");
+        assert_eq!(docs[1].symbol, "\"XGZP6857D\"");
+        assert_eq!(docs[0].reference, "\"U\"");
+        assert_eq!(docs[1].reference, "\"U?\"");
+        assert_eq!(docs[0].value, "\"74HC2G34\"");
+        assert_eq!(docs[1].value, "\"XGZP6857D\"");
+        assert_eq!(docs[0].footprint, "\"Package_TO_SOT_SMD:SOT-363_SC-70-6\"");
+        assert_eq!(docs[1].footprint, "\"winterbloom:XGZP6857D\"");
+        assert_eq!(
+            docs[0].datasheet,
+            "\"https://assets.nexperia.com/documents/data-sheet/74HC_HCT2G34.pdf\""
+        );
+        assert_eq!(docs[1].datasheet, "\"https://www.cfsensor.com/static/upload/file/20220412/XGZP6857D%20Pressure%20Sensor%20Module%20V2.4.pdf\"");
+        Ok(())
+    }
+
+    #[test]
+    fn write_readme() {
+        let mut docs = crate::symbols::build_docs("resources/test/lib.kicad_sym")
+            .expect("Test file lib.kicad_sym must exist");
+        crate::symbols::write_readme(
+            "Test Doc",
+            "test.md",
+            &Some(vec!["symbol".to_string(), "footprint".to_string()]),
+            &None,
+            &mut docs,
+        )
+        .expect("Write should succeed");
+        let file = fs::read_to_string("test.md").expect("Must be able to read test.md");
+        const TEST_MD: &'static str = r#"# Test Doc
+
+Symbol | Footprint
+---|---
+74HC2G34 | Package_TO_SOT_SMD:SOT-363_SC-70-6
+XGZP6857D | winterbloom:XGZP6857D
+"#;
+        assert_eq!(file, TEST_MD);
+        fs::remove_file("test.md").expect("Must be able to delete test.md");
+    }
 }

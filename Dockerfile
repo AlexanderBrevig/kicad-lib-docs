@@ -1,22 +1,18 @@
 FROM rust:1.66.1 as build
 
-RUN USER=root cargo new --bin kicad-lib-docgen
-WORKDIR /kicad-lib-docgen
+RUN USER=root cargo new --bin kicad-lib-docs
+WORKDIR /kicad-lib-docs
 
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
-
-RUN cargo build --release
-RUN rm src/*.rs
-
+COPY ./resources ./resources
 COPY ./src ./src
 
-RUN ls ./target/release/deps
-RUN rm ./target/release/deps/kicad_lib_docgen*
 RUN cargo build --release
+RUN cargo test --release
 
 FROM debian:buster-slim
 
-COPY --from=build /kicad-lib-docgen/target/release/kicad-lib-docgen kicad-lib-docgen
+COPY --from=build /kicad-lib-docs/target/release/kicad-lib-docs kicad-lib-docs
 
-CMD ["kicad-lib-docgen"]
+CMD ["kicad-lib-docs"]

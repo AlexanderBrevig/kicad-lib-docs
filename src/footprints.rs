@@ -70,3 +70,78 @@ pub fn write_readme(
     md::table_content(&mut writer, &format, footprint_docs)?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+
+    use std::fs;
+
+    use crate::docgen::DocItem;
+    use crate::footprints::FootprintDoc;
+
+    #[test]
+    fn elem() {
+        let doc = FootprintDoc {
+            footprint: "footprint".to_string(),
+            step: "step".to_string(),
+        };
+        let elem = doc.elem(&"footprint".to_string());
+        assert_eq!(elem, "footprint");
+    }
+
+    #[test]
+    fn sort_by_key() {
+        let mut docs = vec![
+            FootprintDoc {
+                footprint: "footprint".to_string(),
+                step: "atep".to_string(),
+            },
+            FootprintDoc {
+                footprint: "aootprint".to_string(),
+                step: "step".to_string(),
+            },
+        ];
+        FootprintDoc::sort_by_key(&mut docs, &vec!["footprint".to_string()]);
+        assert_eq!(docs.first().expect("").footprint, "aootprint");
+        FootprintDoc::sort_by_key(&mut docs, &vec!["step".to_string()]);
+        assert_eq!(docs.first().expect("").step, "atep");
+    }
+
+    #[test]
+    fn build_docs() -> Result<(), std::io::Error> {
+        let docs = crate::footprints::build_docs("resources/test/lib.pretty")?;
+        assert_eq!(docs.len(), 2);
+        assert_eq!(docs[0].footprint, "\"AudioJack_WQP518MA\"");
+        assert_eq!(docs[1].footprint, "\"D_SMA\"");
+        assert_eq!(docs[0].step, "\"${WINTERBLOOM3DMOD}/WQP-WQP518MA.step\"");
+        assert_eq!(
+            docs[1].step,
+            "\"${KICAD6_3DMODEL_DIR}/Diode_SMD.3dshapes/D_SMA.wrl\""
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn write_readme() {
+        let mut docs = crate::footprints::build_docs("resources/test/lib.pretty")
+            .expect("Test folder lib.pretty must exist");
+        crate::footprints::write_readme(
+            "Test Doc",
+            "test.md",
+            &Some(vec!["footprint".to_string(), "step".to_string()]),
+            &None,
+            &mut docs,
+        )
+        .expect("Write should succeed");
+        let file = fs::read_to_string("test.md").expect("Must be able to read test.md");
+        const TEST_MD: &'static str = r#"# Test Doc
+
+Footprint | Step
+---|---
+AudioJack_WQP518MA | ${WINTERBLOOM3DMOD}/WQP-WQP518MA.step
+D_SMA | ${KICAD6_3DMODEL_DIR}/Diode_SMD.3dshapes/D_SMA.wrl
+"#;
+        assert_eq!(file, TEST_MD);
+        fs::remove_file("test.md").expect("Must be able to delete test.md");
+    }
+}
