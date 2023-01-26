@@ -1,0 +1,12 @@
+name: 'kicad-lib-docs'
+description: 'Generate markdown from kicad libraries'
+inputs:
+  args:
+    description: 'Command line arguments to kicad-lib-docs, see README.md'
+    required: true
+    default: '--help'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.args }}
