@@ -22,7 +22,7 @@ Or use the binary after installing with `cargo install --path .` like this:
 ```sh
 # if you run after `cargo install --path .` 
 kicad-lib-docgen footprints \
-  -c symbol -c datasheet -c footprint \
+  -c footprint -c step \
   "My amazing library" \
   ~/kicad/amazinglib/footprints/amazing.pretty \
   ~/kicad/amazinglib/footprints/amazing.md
