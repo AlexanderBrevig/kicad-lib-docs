@@ -1,4 +1,4 @@
-# kicad-lib-docgen
+# kicad-lib-docs
 
 > A simple utility for generating markdown files with a table of all symbols and footprints in KiCAD libraries.
 
@@ -21,7 +21,7 @@ Or use the binary after installing with `cargo install --path .` like this:
 
 ```sh
 # if you run after `cargo install --path .` 
-kicad-lib-docgen footprints \
+kicad-lib-docs footprints \
   -c footprint -c step \
   "My amazing library" \
   ~/kicad/amazinglib/footprints/amazing.pretty \
