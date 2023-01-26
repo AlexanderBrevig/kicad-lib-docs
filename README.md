@@ -57,7 +57,7 @@ Options:
   -V, --version          Print version
 ```
 
-### kicad-lib-docgen symbols --help
+### kicad-lib-docgen footprints --help
 
 
 ```sh
