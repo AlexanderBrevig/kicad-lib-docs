@@ -1,5 +1,5 @@
 [package]
-name = "kicad-lib-docgen"
+name = "kicad-lib-docs"
 version = "0.1.0"
 edition = "2021"
 authors = ["Alexander Brevig <alexanderbrevig@gmail.com>"]
