@@ -4,25 +4,37 @@
 
 ## Install and use
 
-`cargo install --path .`
+Simply install with `cargo install --path .`.
 
 You can also run from repo with `cargo run -- symbols --help` which will print the help for symbols.
 
 
 ## Usage
 
-### Example
+You can test it from the repo using `cargo run` as such:
 
 ```sh
-# can also run with: cargo run -- symbols ....
-kicad-lib-docgen symbols -c symbol -c datasheet  -c footprint "My amazing library" ~/kicad/amazinglib/symbols/amazing.kicad_sym ~/kicad/amazinglib/symbols/amazing.md
+cargo run -- symbols "My title" lib.kicad_sym lib.md
+```
+ 
+Or use the binary after installing with `cargo install --path .` like this:
+
+```sh
+# if you run after `cargo install --path .` 
+kicad-lib-docgen footprints \
+  -c symbol -c datasheet -c footprint \
+  "My amazing library" \
+  ~/kicad/amazinglib/footprints/amazing.pretty \
+  ~/kicad/amazinglib/footprints/amazing.md
 ```
 
-Will render (I used https://github.com/wntrblm/winterbloom_kicad_library/blob/main/symbols/winterbloom.kicad_sym as an example) the following (showing only first 6):
+### Example
+
+Here is an example by using https://github.com/wntrblm/winterbloom_kicad_library/blob/main/symbols/winterbloom.kicad_sym as the input.
 
 ---
 
-# My amazing library
+# Winterbloom
 
 
 Symbol | Datasheet | Footprint
@@ -34,46 +46,3 @@ ADG1208 | https://www.analog.com/media/en/technical-documentation/data-sheets/AD
 ADG1209 | https://www.analog.com/media/en/technical-documentation/data-sheets/ADG1208_1209.pdf | Package_SO:TSSOP-16_4.4x5mm_P0.65mm
 ADG1308 | https://www.analog.com/media/en/technical-documentation/data-sheets/ADG1308_1309.pdf | Package_SO:TSSOP-16_4.4x5mm_P0.65mm
 
----
-
-### kicad-lib-docgen symbols --help
-
-
-```sh
-Create README for symbols
-
-Usage: kicad-lib-docgen symbols [OPTIONS] <TITLE> <IN_FILE> <OUT_FILE>
-
-Arguments:
-  <TITLE>     Title of README
-  <IN_FILE>   Path to input kicad_sym file
-  <OUT_FILE>  Path to output README.md file
-
-Options:
-  -c, --column <COLUMN>  Add multiple columns. Default is `-c symbol -c footprint -c datasheet` [possible
-                         values: symbol, reference, footprint, datasheet, value]
-  -e, --env <ENV>        ENV is key=value, use to replace paths for datasheets
-  -h, --help             Print help
-  -V, --version          Print version
-```
-
-### kicad-lib-docgen footprints --help
-
-
-```sh
-Create README for footprints
-
-Usage: kicad-lib-docgen footprints [OPTIONS] <TITLE> <IN_FILE> <OUT_FILE>
-
-Arguments:
-  <TITLE>     Title of README
-  <IN_FILE>   Path to input kicad_sym file
-  <OUT_FILE>  Path to output README.md file
-
-Options:
-  -c, --column <COLUMN>  Add multiple columns. Default is `-c footprint -c step` [possible values:
-                         footprint, step]
-  -e, --env <ENV>        ENV is key=value, use to replace paths for datasheets
-  -h, --help             Print help
-  -V, --version          Print version
-```
