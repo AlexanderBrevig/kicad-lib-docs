@@ -20,7 +20,11 @@ impl DocItem for SymbolDoc {
             "reference" => md::lexpr_str_to_md(self.reference.clone()),
             "value" => md::lexpr_str_to_md(self.value.clone()),
             "footprint" => md::lexpr_str_to_md(self.footprint.clone()),
-            "datasheet" => md::lexpr_str_to_md(self.datasheet.clone()),
+            "datasheet" => format!(
+                "[{}]({})",
+                md::lexpr_str_to_md(self.symbol.clone()),
+                md::lexpr_str_to_md(self.datasheet.clone())
+            ),
             _ => String::new(),
         }
     }
@@ -30,7 +34,7 @@ impl SymbolDoc {
     pub fn sort_by_key(docs: &mut [SymbolDoc], format: &Vec<String>) {
         let first = format
             .first()
-            .expect("Must have at least one column")
+            .expect("Must hae at least one column")
             .as_str();
         match first {
             "symbol" => docs.sort_by_key(|doc| doc.symbol.clone()),
@@ -179,7 +183,11 @@ mod tests {
         crate::symbols::write_readme(
             "Test Doc",
             "test.md",
-            &Some(vec!["symbol".to_string(), "footprint".to_string()]),
+            &Some(vec![
+                "symbol".to_string(),
+                "datasheet".to_string(),
+                "footprint".to_string(),
+            ]),
             &None,
             &mut docs,
         )
@@ -187,10 +195,10 @@ mod tests {
         let file = fs::read_to_string("test.md").expect("Must be able to read test.md");
         const TEST_MD: &'static str = r#"# Test Doc
 
-Symbol | Footprint
----|---
-74HC2G34 | Package_TO_SOT_SMD:SOT-363_SC-70-6
-XGZP6857D | winterbloom:XGZP6857D
+Symbol | Datasheet | Footprint
+---|---|---
+74HC2G34 | [74HC2G34](https://assets.nexperia.com/documents/data-sheet/74HC_HCT2G34.pdf) | Package_TO_SOT_SMD:SOT-363_SC-70-6
+XGZP6857D | [XGZP6857D](https://www.cfsensor.com/static/upload/file/20220412/XGZP6857D%20Pressure%20Sensor%20Module%20V2.4.pdf) | winterbloom:XGZP6857D
 "#;
         assert_eq!(file, TEST_MD);
         fs::remove_file("test.md").expect("Must be able to delete test.md");

@@ -13,7 +13,11 @@ impl DocItem for FootprintDoc {
     fn elem(&self, el: &String) -> String {
         match el.as_str() {
             "footprint" => md::lexpr_str_to_md(self.footprint.clone()),
-            "step" => md::lexpr_str_to_md(self.step.clone()),
+            "step" => format!(
+                "[{}]({})",
+                md::lexpr_str_to_md(self.footprint.clone()),
+                md::lexpr_str_to_md(self.step.clone())
+            ),
             _ => String::new(),
         }
     }
@@ -138,8 +142,8 @@ mod tests {
 
 Footprint | Step
 ---|---
-AudioJack_WQP518MA | ${WINTERBLOOM3DMOD}/WQP-WQP518MA.step
-D_SMA | ${KICAD6_3DMODEL_DIR}/Diode_SMD.3dshapes/D_SMA.wrl
+AudioJack_WQP518MA | [AudioJack_WQP518MA](${WINTERBLOOM3DMOD}/WQP-WQP518MA.step)
+D_SMA | [D_SMA](${KICAD6_3DMODEL_DIR}/Diode_SMD.3dshapes/D_SMA.wrl)
 "#;
         assert_eq!(file, TEST_MD);
         fs::remove_file("test.md").expect("Must be able to delete test.md");
